@@ -24,22 +24,22 @@ fn main() {
 
     println!("{}", self_contained_ranges);
 
-    // let overlaps: u32 = content
-    //     .lines()
-    //     .map(|line| {
-    //         let (lo, hi) = if let Some((lo, hi)) = line.split_once(",") { (lo, hi) } else { todo!() };
-    //         let (a, b) = if let Some((a, b)) = lo.split_once("-") { (a, b) } else { todo!() };
-    //         let (x, y) = if let Some((x, y)) = hi.split_once("-") { (x, y) } else { todo!() };
+    let overlaps: u32 = content
+        .lines()
+        .map(|line| {
+            let (lo, hi) = if let Some((lo, hi)) = line.split_once(",") { (lo, hi) } else { todo!() };
+            let (a, b) = if let Some((a, b)) = lo.split_once("-") { (a, b) } else { todo!() };
+            let (x, y) = if let Some((x, y)) = hi.split_once("-") { (x, y) } else { todo!() };
 
-    //         let c = a.parse::<u32>().unwrap();
-    //         let d = b.parse::<u32>().unwrap();
+            let c = a.parse::<u32>().unwrap();
+            let d = b.parse::<u32>().unwrap();
 
-    //         let w = x.parse::<u32>().unwrap();
-    //         let z = y.parse::<u32>().unwrap();
+            let w = x.parse::<u32>().unwrap();
+            let z = y.parse::<u32>().unwrap();
 
-    //         ((c <= w && d >= z) || (w <= c && z >= d)) as u32
-    //     })
-    //     .sum();
+            (((c <= w) && (d >= w)) || ((w <= c) && (z >= c))) as u32
+        })
+        .sum();
 
-    // println!("{}", overlaps);
+    println!("{}", overlaps);
 }
