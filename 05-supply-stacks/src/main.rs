@@ -2,6 +2,13 @@ use std::collections::HashMap;
 use std::env;
 use std::fs;
 
+fn show(stacks: &HashMap<&str, Vec<char>>) {
+    for (id, stack) in stacks {
+        println!("{}: {:?}", id, stack);
+    }
+
+}
+
 fn main() {
     let content = fs::read_to_string(env::args().nth(1).expect("expected a file"))
         .expect("could not load the file");
@@ -19,6 +26,8 @@ fn main() {
     let cmds = commands.to_string();
 
     for line in cmds.lines() {
+        show(&stacks);
+
         let cm: Vec<String> = line
             .split_whitespace()
             .map(|x| {
@@ -32,32 +41,38 @@ fn main() {
             .filter(|y| !y.is_empty())
             .collect();
 
-        println!("{:?}", cm);
+        println!("move: {:?}", cm);
 
         if let [mve, from, to] = &cm[..] {
-            let mv = mve.parse::<u32>().unwrap();
+            let mut mv = mve.parse::<u32>().unwrap();
 
             let f = stacks.get_mut(&from as &str);
             if let Some(f) = f {
                 let mut to_push: Vec<char> = Vec::new();
-                for _ in 1..mv {
-                    to_push.push(f.pop().unwrap());
+                while mv > 0 { 
+                    to_push.push(f.remove(0));
+                    mv -= 1;
                 }
 
+                println!("PUSHING: {:?}", to_push);
                 let t = stacks.get_mut(&to as &str);
                 if let Some(t) = t {
-                    for e in to_push {
+                    for e in to_push.drain(..) {
                         t.push(e);
                     }
                 }
+
             }
         }
+        // TODO: only print the last item in stack
+        // show(&stacks);
+        println!("----------")
     }
 
 
     // TODO: only print the last item in stack
-    // for (id, stack) in &stacks {
-    //     println!("{}: {:?}", id, stack);
-    // }
+    for (id, stack) in &stacks {
+        println!("{}: {:?}", id, stack);
+    }
 
 }
