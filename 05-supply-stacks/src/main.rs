@@ -3,8 +3,13 @@ use std::collections::VecDeque;
 use std::env;
 use std::fs;
 
-fn run(stacks: &HashMap<&str, VecDeque<char>>, commands: &Vec<Vec<String>>) -> String {
+fn run(
+    stacks: &HashMap<&str, VecDeque<char>>,
+    commands: &Vec<Vec<String>>,
+    crate_mover_9001: bool,
+) -> String {
     let mut stk = stacks.clone();
+
     for cmd in commands {
         if let [mve, from, to] = &cmd[..] {
             let mut mv = mve.parse::<u32>().unwrap();
@@ -19,8 +24,14 @@ fn run(stacks: &HashMap<&str, VecDeque<char>>, commands: &Vec<Vec<String>>) -> S
 
                 let t = stk.get_mut(&to as &str);
                 if let Some(t) = t {
-                    for e in to_push.drain(..) {
-                        t.push_front(e);
+                    if crate_mover_9001 {
+                        for e in to_push.drain(..).rev() {
+                            t.push_front(e);
+                        }
+                    } else {
+                        for e in to_push.drain(..) {
+                            t.push_front(e);
+                        }
                     }
                 }
             }
@@ -30,11 +41,10 @@ fn run(stacks: &HashMap<&str, VecDeque<char>>, commands: &Vec<Vec<String>>) -> S
     let mut sorted_keys: Vec<&&str> = stk.keys().collect();
     sorted_keys.sort();
 
-    let mut s = String::from("");
-    for e in sorted_keys {
-        s.push(stk.get(e).unwrap().get(0).unwrap().clone());
-    }
-    s
+    sorted_keys
+        .iter()
+        .map(|e| stk.get(&e as &str).unwrap().get(0).unwrap())
+        .collect::<String>()
 }
 
 fn main() {
@@ -69,5 +79,6 @@ fn main() {
         })
         .collect();
 
-    println!("{}", run(&stacks, &cmds));
+    println!("{}", run(&stacks, &cmds, false));
+    println!("{}", run(&stacks, &cmds, true));
 }
