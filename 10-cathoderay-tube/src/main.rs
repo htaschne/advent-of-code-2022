@@ -10,6 +10,7 @@ struct Cpu {
     cycles: usize,
     to_add: HashMap<usize, i32>,
     last_cyle: usize,
+    strength_signals: Vec<i32>,
 }
 
 impl Cpu {
@@ -20,6 +21,7 @@ impl Cpu {
             cycles: 0,
             to_add: HashMap::new(),
             last_cyle: 0,
+            strength_signals: Vec::new(),
         }
     }
 
@@ -27,28 +29,32 @@ impl Cpu {
         let instruction = self.instructions.pop_front().unwrap();
         let cmd: Vec<String> = instruction.split(" ").map(|cmd| cmd.to_string()).collect();
 
-        if self.to_add.contains_key(&self.cycles) {
-            self.x += self.to_add.get(&self.cycles).unwrap();
+        // print!("Cycle: {}, ", self.cycles);
+
+        if self.cycles % 20 == 0 && self.cycles != 0 {
+            println!("[{}]: {}", self.cycles, self.x * self.cycles as i32);
+            self.strength_signals.push(self.x * self.cycles as i32);
         }
 
-        print!("Cycle: {}, ", self.cycles);
         match cmd.get(0).unwrap().as_str() {
             "addx" => {
                 let index = self.cycles + 2;
+                self.last_cyle = if index > self.last_cyle { index } else { self.last_cyle };
                 let value = cmd.get(1).unwrap().parse::<i32>().unwrap();
 
-                // isn't there a max(val, val) where val derives ord?
-                self.last_cyle = if index > self.last_cyle { index } else { self.last_cyle };
-
-                println!("promise to add {} at cycle {}", value, index);
-                self.to_add.insert(index, value)
+                // println!("promise to add {} at cycle {}", value, index);
+                self.to_add.insert(index, value);
             },
             "noop" => {
-                println!("noop");
-                Some(0)
+                // println!("noop");
+                ()
             }
-            _ => Some(0),
+            _ => (),
         };
+
+        if self.to_add.contains_key(&self.cycles) {
+            self.x += self.to_add.get(&self.cycles).unwrap().clone();
+        }
 
         self.cycles += 1;
     }
@@ -59,15 +65,21 @@ impl Cpu {
         }
 
         for cycle in self.cycles..self.last_cyle + 1 {
-            print!("Cycle: {}, ", cycle);
+            // print!("Cycle: {}, ", cycle);
+
+            if cycle % 20 == 0 {
+                println!("[{}]: {}", cycle, self.x * cycle as i32);
+                self.strength_signals.push(self.x * cycle as i32);
+            }
+
             if self.to_add.contains_key(&cycle) {
                 let value = self.to_add.get(&cycle).unwrap();
-                println!("added {} to x", value);
+                // println!("added {} to x", value);
                 self.x += value;
             }
         }
 
-        self.x
+        self.strength_signals.iter().sum()
     }
 }
 
@@ -78,6 +90,6 @@ fn main() {
     let instructions: VecDeque<String> = content.lines().map(|line| line.to_string()).collect();
     let mut cpu = Cpu::new(instructions);
 
-    let xreg = cpu.run();
-    println!("{}", xreg);
+    let strength_signal = cpu.run();
+    println!("{}", strength_signal);
 }
