@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::env;
 use std::fs;
+use std::cmp;
 
 fn find(root: &str, graph: &HashMap<&str, &str>) -> i64 {
     match graph.get(root).unwrap().parse::<i64>() {
@@ -25,6 +26,19 @@ fn find(root: &str, graph: &HashMap<&str, &str>) -> i64 {
                 }
                 "/" => {
                     find(operation.get(0).unwrap(), graph) / find(operation.get(2).unwrap(), graph)
+                }
+                "=" => {
+                    let lo = find(operation.get(0).unwrap(), graph);
+                    let hi = find(operation.get(2).unwrap(), graph);
+
+                    let mx = cmp::max(lo, hi);
+                    let mn = cmp::min(lo, hi);
+                    
+                    let val = mx - mn;
+
+                    println!("{} {}: {}", mn, mx, val);
+                    // println!("{}", val + mx + 1);
+                    val + mx + 1
                 }
                 _ => panic!("could not mactch operation {}", operation.get(1).unwrap()),
             }
